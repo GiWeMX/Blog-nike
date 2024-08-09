@@ -1,0 +1,100 @@
+
+{% block comment %}
+<div class="container">
+  <div class="row">
+      <div class="col-md-8"> 
+          <h2>Комментарии</h2>
+          <form method='post' class="mb-3" >
+              {% csrf_token %}
+              <div class="mb-3"> 
+                <label id="id_text" for="inputContent">Напишите ваш комментарий</label>
+                <input type="text" class="form-control" id="id_text"
+                name="text">
+              </div>
+              <div class="col-mt-2">
+                <small class="form-text text-muted">Пожалуйста, не спамьте. </small>
+              </div>
+            </div>
+          </div>
+                <button name='comment' type="submit" class="btn btn-primary mt-2">Отправить</button>
+              </form>
+          <div class="comment-list mt-4">
+      {% for c in comments %}
+            <div class="d-flex mb-4 flex-column">
+              <img src=" {% if c.user.image %}{{c.user.image.url}} {% else %} https://github.com/mdo.png{% endif %} " alt="Аватар пользователя" class="rounded-circle me-3" width='60px' height='60'>
+              <div class="flex-grow-1">  <h5 class="mt-0">{{ c.user }} <small class="text-muted">{{c.date}}</small></h5>
+                <span>{{c.text}}</span>
+                <form action='{% url "comment_like" c.id %}' method="post">
+                  {% csrf_token %} 
+                  {% if request.user.is_authenticated %} 
+                    {% if c.is_liked %}
+                    <button type="submit" class="btn btn-sm btn-danger mt-1" name='comment_like'>
+                      <i class="bx bx-heart mt-1"></i>
+                    </button>
+                    {% else %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger mt-1" name='comment_like'>
+                      <i class="bx bx-heart mt-1"></i>
+                    </button>
+                    {% endif %} 
+                  {% else %}
+                  <a href="{% url 'login' %}" class="btn btn-sm btn-danger">
+                    <i class="bx bx-heart"></i>
+                  </a>
+                  {% endif %}
+                </form>
+                {% if request.user == c.user or request.user.is_superuser %}  
+                <form action="{% url 'delete_comment' c.id %}" method="post">  {% csrf_token %}
+                  <button name="comment_delete" type="submit" class="btn btn-sm btn-danger mt-1">Удалить</button>
+                </form>
+                {% else %}
+                <p class="d-inline-flex gap-1 mt-1">
+                  <a class="btn btn-primary" data-bs-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                    Ответить
+                  </a>
+                </p>
+                <div class="collapse" id="collapseExample">
+                  <form action="{% url "comment_reply" c.id %}" method='post'>
+                    {% csrf_token %}
+                    <label id="id_reply" for="inputContent">Напишите ваш комментарий</label>
+                    <input type="text" class="form-control" id="id_reply"
+                    name="reply">
+                    <button type="submit" class="btn btn-sm btn-outline-danger mt-1" name='comment_reply'>Отправить</button>
+                  </form>
+                </div>
+              {% endif %}
+            </div>
+        
+        {% for r in c.children %}
+        <div class="d-flex flex-column  mb-4 mx-4">
+          <img src=" {% if r.user.image %}{{r.user.image.url}} {% else %} https://github.com/mdo.png{% endif %} " alt="Аватар пользователя" class="rounded-circle me-3" width='60px' height='60'>
+          <div class="flex-grow-1">  <h5 class="mt-0">{{ r.user }} <small class="text-muted">{{r.date}}</small></h5>
+            <span>{{c.text}}</span>
+            <form action='{% url "comment_like" c.id %}' method="post">
+              {% csrf_token %} 
+              {% if request.user.is_authenticated %} 
+                {% if r.is_liked %}
+                <button type="submit" class="btn btn-sm btn-danger" name='comment_like'>
+                  <i class="bx bx-heart"></i>
+                </button>
+                {% else %}
+                <button type="submit" class="btn btn-sm btn-outline-danger" name='comment_like'>
+                  <i class="bx bx-heart"></i>
+                </button>
+                {% endif %} 
+              {% else %}
+              <a href="{% url 'login' %}" class="btn btn-sm btn-danger">
+                <i class="bx bx-heart"></i>
+              </a>
+              {% endif %}
+            </form>
+            {% if request.user == r.user or request.user.is_superuser %}  
+            <form action="{% url 'delete_comment' r.id %}" method="post">  {% csrf_token %}
+              <button name="comment_delete" type="submit" class="btn btn-sm btn-danger mt-1">Удалить</button>
+            </form>
+          {% endif %}
+      </div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+</div>
+{% endblock comment %}

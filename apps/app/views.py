@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
-from .models import Post, Category, Like
+from .models import CommentLike, Post, Category, Like, Comment
 
-from .forms import PostForm
+from .forms import CommentForm, PostForm
 from django.db.models import Q
 from datetime import datetime
 
@@ -52,25 +52,46 @@ def home(request):
 
 def post_detail(request, pk):
     post = Post.objects.get(id=pk)
+    comments = Comment.objects.filter(post=post, parent=None).all()
+
+    for i in comments:
+        if request.user.is_authenticated:
+            if i.commentlike_set.filter(user=request.user).exists():
+                i.is_liked = True
+            else:
+                i.is_liked = False
+
+    form = CommentForm()
 
     if request.user.is_authenticated:
         is_liked = Like.objects.filter(user=request.user, post=post).exists()
     else:
         is_liked = False
 
-
     if request.method == 'POST':
-        if is_liked:
-            Like.objects.filter(user=request.user, post=post).delete()
-            return redirect('post_detail', pk=post.id)
-        else:
-            Like.objects.create(user=request.user, post=post)
-            return redirect('post_detail', pk=post.id)
-    
-
+        if 'like' in request.POST:
+            if is_liked:
+                Like.objects.filter(user=request.user, post=post).delete()
+                return redirect('post_detail', pk=post.id)
+            else:
+                Like.objects.create(user=request.user, post=post)
+                return redirect('post_detail', pk=post.id)
+            
+        elif 'comment' in request.POST:
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                form = form.save(commit=False)
+                form.user = request.user
+                form.post = post
+                form.save()
+                return redirect('post_detail', pk=post.id)
+        
     context = {
         'post': post,
-        'is_liked': is_liked
+        'is_liked': is_liked,
+        'form': form,
+        'comments': comments
+        
     }
 
     return render(request, 'app/post_detail.html', context)
@@ -123,4 +144,51 @@ def post_delete(request, pk):
         return redirect('home')
 
     return render(request, 'app/post_delete.html', {'post': post})
+
+def my_posts(request):
+    posts = Post.objects.filter(user=request.user)
+    return render(request, 'app/my_posts.html', {'posts': posts})
+
+
+
+def delete_comment(request, pk):
+    comment = Comment.objects.get(id=pk)
+    if request.method == 'POST':
+        comment.delete()
+        return redirect('post_detail', pk=comment.post.id)
+    return render(request, 'app/post_detail.html', {'comment': comment})
+
+
+def comment_like(request, pk):
+    comment = Comment.objects.get(id=pk)
+
+    if request.user.is_authenticated:
+        comment_liked = CommentLike.objects.filter(user=request.user, comment=comment).exists()
+    else:
+        comment_liked = False
+
+    if request.method == 'POST':
+        if CommentLike.objects.filter(user=request.user, comment=comment).exists():
+            CommentLike.objects.filter(user=request.user, comment=comment).delete()
+            return redirect('post_detail', pk=comment.post.id)
+        else:
+            CommentLike.objects.create(user=request.user, comment=comment)
+            return redirect('post_detail', pk=comment.post.id)
+        
+    context = {
+        'comment_liked': comment_liked,
+        'comment': comment
+    }
+    return render(request, 'app/post_detail.html', context)
+
+
+def comment_reply(request, pk):
+    if request.method == "POST":
+        if 'comment_reply' in request.POST:
+            text = request.POST.get('reply')
+            comment = Comment.objects.get(id=pk)
+            Comment.objects.create(user=request.user, parent=comment, text=text, post=comment.post)
+            return redirect('post_detail', pk=comment.post.id)
+
+
 

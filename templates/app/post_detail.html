@@ -1,76 +1,83 @@
-{% extends 'base.html' %}
-
-
-{% block icon %}
-<link rel="icon" type="image/x-icon" href="https://mykaleidoscope.ru/x/uploads/posts/2022-10/1666792659_15-mykaleidoscope-ru-p-krasnie-kedi-naik-oboi-18.jpg">
-{% endblock %}
-
-
-{% block title %}
-    {{ post.title }}
-{% endblock title %}
-
+{% extends 'base.html' %} {% block icon %}
+<link
+  rel="icon"
+  type="image/x-icon"
+  href="https://mykaleidoscope.ru/x/uploads/posts/2022-10/1666792659_15-mykaleidoscope-ru-p-krasnie-kedi-naik-oboi-18.jpg"
+/>
+{% endblock %} {% block title %} {{ post.title }} {% endblock title %} 
 {% block content %}
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-8">
-            <h1>{{ post.title }}</h1>
-            <p class="text-muted">{{ post.date }} - @{{ post.user.username }}</p>
-            <div class="d-flex gap-2">
-                {% for i in post.category.all %}
-                    <a href="{% url 'home' %}?category={{ i.name }}" class="badge bg-info">{{ i.name }}</a>
-                {% endfor %}
-            </div>
-            <hr>
-            <p>
-                {{ post.description|safe }}
-            </p>
-        </div>
-    
-        <div class="col-4 mt-5">
-            <div class="row gap-3 mb-3">
-                {% if request.user == post.user or request.user.is_superuser %}
-                <div class="col-1">
-                    <a href="{% url 'post_update' post.id %}" class="btn btn-success">
-                        <i class='bx bx-edit'></i>
-                    </a>
-                </div>
-                <div class="col-1">
-                    <a href="{% url 'post_delete' post.id %}" class="btn btn-danger">
-                        <i class='bx bx-trash'></i>
-                    </a>
-                </div>
-
-                {% else %}
-                
-                <form action="" method="post">
-                    {% if request.user.is_authenticated %}
-                        {% csrf_token %}
-                        {% if is_liked %}
-                            <button type="submit" class="btn btn-secondary">
-                                <i class='bx bx-heart'></i>
-                            </button>
-                        {% else %}
-                            <button type="submit" class="btn btn-danger">
-                                <i class='bx bx-heart'></i>
-                            </button>
-                        {% endif %}
-                        {% else %}
-                            <a href="{% url 'login' %}" class="btn btn-danger">
-                                <i class='bx bx-heart'></i>
-                            </a>
-                    {% endif %}
-                </form>
-
-
-                {% endif %}
-            </div>
-            {% if post.image %}
-            <img style="object-fit: cover;" src="{{ post.image.url }}" class="bd-placeholder-img card-img-top" width="100%" height="225">
-            {% else %}
-            <img style="object-fit: cover;" src="https://mykaleidoscope.ru/x/uploads/posts/2022-10/1666792659_15-mykaleidoscope-ru-p-krasnie-kedi-naik-oboi-18.jpg" class="bd-placeholder-img card-img-top" width="100%" height="225">
-            {% endif %}
-        </div>
+  <div class="row">
+    <div class="col-8">
+      <h1>{{ post.title }}</h1>
+      <p class="text-muted">{{ post.date }} - <a href="{% url "profile" post.user.id %}">@{{ post.user.username }}</a></p>
+      <div class="d-flex gap-2">
+        {% for i in post.category.all %}
+        <a href="{% url 'home' %}?category={{ i.name }}" class="badge bg-info"
+          >{{ i.name }}</a
+        >
+        {% endfor %}
+      </div>
+      <hr />
+      <p>{{ post.description|safe }}</p>
     </div>
+
+    <div class="col-4 mt-5">
+      <div class="row gap-3 mb-3">
+        {% if request.user == post.user or request.user.is_superuser %}
+        <div class="col-1">
+          <a href="{% url 'post_update' post.id %}" class="btn btn-success">
+            <i class="bx bx-edit"></i>
+          </a>
+        </div>
+        <div class="col-1">
+          <a href="{% url 'post_delete' post.id %}" class="btn btn-danger">
+            <i class="bx bx-trash"></i>
+          </a>
+        </div>
+        {% else %}
+        <form action="" method="post" >
+          {% if request.user.is_authenticated %} {% csrf_token %} 
+            {% if is_liked%}
+            <button type="submit" class="btn btn-secondary" name='like' id='#'>
+              <i class="bx bx-heart"></i>
+            </button>
+            {% else %}
+            <button type="submit" class="btn btn-danger" name='like' id='#'>
+              <i class="bx bx-heart"></i>
+            </button>
+            {% endif %} 
+          {% else %}
+          <a href="{% url 'login' %}" class="btn btn-danger">
+            <i class="bx bx-heart"></i>
+          </a>
+          {% endif %}
+        </form>
+
+        {% endif %}
+      </div>
+      {% if post.image %}
+      <img
+        style="object-fit: cover"
+        src="{{ post.image.url }}"
+        class="bd-placeholder-img card-img-top"
+        width="100%"
+        height="225"
+      />
+      {% else %}
+      <img
+        style="object-fit: cover"
+        src="https://mykaleidoscope.ru/x/uploads/posts/2022-10/1666792659_15-mykaleidoscope-ru-p-krasnie-kedi-naik-oboi-18.jpg"
+        class="bd-placeholder-img card-img-top"
+        width="100%"
+        height="225"
+      />
+      {% endif %}
+    </div>
+  </div>
 </div>
+{% include "includes/comments.html" %}
+
+
+
 {% endblock %}

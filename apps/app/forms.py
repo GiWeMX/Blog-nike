@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post
+from .models import Post, Comment
 
 from django_summernote.widgets import SummernoteWidget
 
@@ -20,3 +20,13 @@ class PostForm(forms.ModelForm):
             'description': SummernoteWidget(),
             'category': forms.CheckboxSelectMultiple()
         }
+
+
+
+class CommentForm(forms.ModelForm):
+
+    class Meta:
+        model = Comment
+        fields = ['text']
+
+    text = forms.CharField(max_length=300) 

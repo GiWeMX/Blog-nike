@@ -41,3 +41,35 @@ class Like(models.Model):
     class Meta:
         verbose_name = 'Лайк'
         verbose_name_plural = 'Лайки'
+
+
+class Comment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    text = models.TextField(max_length=300)
+    date = models.DateTimeField(auto_now_add=True)
+
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.post.title}'
+    
+
+    def children(self):
+        return Comment.objects.filter(parent=self)
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+
+
+class CommentLike(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.user.username} -> {self.comment.text[:30]}'
+    
+    class Meta:
+        verbose_name = 'Лайк комментария'
+        verbose_name_plural = 'Лайки комментариев'

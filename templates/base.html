@@ -88,8 +88,8 @@
                     <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
                   </a>
                   <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1" style="">
-                    <li><a class="dropdown-item" href="#">Создать пост</a></li>
-                    <li><a class="dropdown-item" href="#">Мои посты</a></li>
+                    <li><a class="dropdown-item" href="{% url "post_create" %}">Создать пост</a></li>
+                    <li><a class="dropdown-item" href="{% url "my_posts" %}">Мои посты</a></li>
                     <li><a class="dropdown-item" href="{% url "profile" request.user.id %}">Профиль</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="{% url 'logout' %}">Выход</a></li>

@@ -8,5 +8,8 @@ class PostAdmin(SummernoteModelAdmin):
     list_display = ('title', 'date')
     list_filter = ('date',)
 
+
 admin.site.register(Post, PostAdmin)
 admin.site.register(Category)
+admin.site.register(Comment)
+admin.site.register(Like)

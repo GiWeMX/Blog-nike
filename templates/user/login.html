@@ -29,10 +29,16 @@
                         <div class="mb-3">
                             <label for="inputUsername">Имя пользователя</label>
                             {{ form.username }}
+                            {% if form.username.errors %}
+                            <div class="alert alert-danger alert-dismissible fade show">{{form.username.errors}}</div>
+                            {% endif %}
                         </div>
                         <div class="mb-3">
                             <label for="inputPassword">Пароль</label>
                             {{ form.password }}
+                            {% if form.password.errors %}
+                            <div class="alert alert-danger alert-dismissible fade show">{{form.password.errors}}</div>
+                            {% endif %}
                         </div>
                         <button class="btn btn-danger" type="submit">Войти</button>
                     </form>
